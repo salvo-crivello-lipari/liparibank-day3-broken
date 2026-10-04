@@ -104,8 +104,8 @@ const TransactionList = () => {
 			</div>
 
 			<ul className={styles.list}>
-				{filteredTransactions.map((tx, index) => (
-					<TransactionItem key={index} transaction={tx} />
+				{filteredTransactions.map((tx) => (
+					<TransactionItem key={tx.id} transaction={tx} />
 				))}
 			</ul>
 		</div>
