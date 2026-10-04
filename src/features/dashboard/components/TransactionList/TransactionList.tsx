@@ -1,7 +1,8 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useReducer } from 'react';
 import FilterPanel, { type Filters } from '../FilterPanel/FilterPanel';
 import TransactionItem, { type Transaction } from '../TransactionItem/TransactionItem';
 import styles from './TransactionList.module.css';
+import TransactionStats from '../transactionsStats/TransactionStats';
 
 const creditDescriptions = [
 	'Stipendio Novembre',
@@ -54,8 +55,33 @@ const allTransactions = generateTransactions(50);
 
 const defaultFilters: Filters = { type: 'all', searchText: '' };
 
+// ============================================================================
+
+type FilterAction =
+	| { type: 'SET_TYPE'; payload: Filters['type'] }
+	| { type: 'SET_SEARCH'; payload: string }
+	| { type: 'RESET' };
+
+const filterReducer = (state: Filters, action: FilterAction): Filters => {
+	switch (action.type) {
+		case 'SET_TYPE':
+			return { ...state, type: action.payload };
+
+		case 'SET_SEARCH':
+			return { ...state, searchText: action.payload };
+
+		case 'RESET':
+			return defaultFilters;
+
+		default:
+			return state;
+	}
+};
+
+// ============================================================================
+
 const TransactionList = () => {
-	const [filters, setFilters] = useState<Filters>(defaultFilters);
+	const [filters, dispatch] = useReducer(filterReducer, defaultFilters);
 
 	const filteredTransactions = useMemo(() => {
 		return allTransactions.filter((tx) => {
@@ -71,15 +97,15 @@ const TransactionList = () => {
 	}, [filteredTransactions]);
 
 	const handleTypeChange = useCallback((type: Filters['type']) => {
-		setFilters((prev) => ({ ...prev, type }));
+		dispatch({ type: 'SET_TYPE', payload: type });
 	}, []);
 
 	const handleSearchChange = useCallback((text: string) => {
-		setFilters((prev) => ({ ...prev, searchText: text }));
+		dispatch({ type: 'SET_SEARCH', payload: text });
 	}, []);
 
 	const handleResetFilters = useCallback(() => {
-		setFilters(defaultFilters);
+		dispatch({ type: 'RESET' });
 	}, []);
 
 	return (
@@ -95,6 +121,8 @@ const TransactionList = () => {
 				onSearchChange={handleSearchChange}
 				onReset={handleResetFilters}
 			/>
+
+			<TransactionStats transactions={filteredTransactions} />
 
 			<div className={styles.totalRow}>
 				<span className={styles.totalLabel}>Saldo periodo filtrato:</span>
