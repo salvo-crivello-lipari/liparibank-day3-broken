@@ -1,0 +1,58 @@
+.container {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem 1rem;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.count {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg);
+  padding: 0.2rem 0.625rem;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.totalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background-color: #f9fafb;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.totalLabel {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.totalValue {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.positive { color: var(--color-success); }
+.negative { color: var(--color-danger); }
+
+.list {
+  padding: 0 1.5rem;
+  max-height: 480px;
+  overflow-y: auto;
+}
