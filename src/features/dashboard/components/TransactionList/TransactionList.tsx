@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import FilterPanel, { type Filters } from '../FilterPanel/FilterPanel';
 import TransactionItem, { type Transaction } from '../TransactionItem/TransactionItem';
 import styles from './TransactionList.module.css';
@@ -57,18 +57,18 @@ const defaultFilters: Filters = { type: 'all', searchText: '' };
 const TransactionList = () => {
 	const [filters, setFilters] = useState<Filters>(defaultFilters);
 
-	const filteredTransactions = allTransactions.filter((tx) => {
-		const matchesType = filters.type === 'all' || tx.type === filters.type;
-		const matchesSearch = tx.description.toLowerCase().includes(filters.searchText.toLowerCase());
-		return matchesType && matchesSearch;
-	});
+	const filteredTransactions = useMemo(() => {
+		return allTransactions.filter((tx) => {
+			const matchesType = filters.type === 'all' || tx.type === filters.type;
+			const matchesSearch = tx.description.toLowerCase().includes(filters.searchText.toLowerCase());
 
-	let expensiveTotal = 0;
-	for (let i = 0; i < 50000; i++) {
-		expensiveTotal += i * 0.00001;
-	}
-	const total = filteredTransactions.reduce((sum, tx) => sum + (tx.type === 'credit' ? tx.amount : -tx.amount), 0);
-	expensiveTotal = total;
+			return matchesType && matchesSearch;
+		});
+	}, [filters]);
+
+	const total = useMemo(() => {
+		return filteredTransactions.reduce((sum, tx) => sum + (tx.type === 'credit' ? tx.amount : -tx.amount), 0);
+	}, [filteredTransactions]);
 
 	const handleTypeChange = useCallback((type: Filters['type']) => {
 		setFilters((prev) => ({ ...prev, type }));
@@ -98,8 +98,8 @@ const TransactionList = () => {
 
 			<div className={styles.totalRow}>
 				<span className={styles.totalLabel}>Saldo periodo filtrato:</span>
-				<span className={`${styles.totalValue} ${expensiveTotal >= 0 ? styles.positive : styles.negative}`}>
-					{new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(expensiveTotal)}
+				<span className={`${styles.totalValue} ${total >= 0 ? styles.positive : styles.negative}`}>
+					{new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(total)}
 				</span>
 			</div>
 
