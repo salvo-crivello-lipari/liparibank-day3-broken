@@ -1,8 +1,8 @@
-import { useCallback, useMemo, useReducer } from 'react';
-import FilterPanel, { type Filters } from '../FilterPanel/FilterPanel';
+import FilterPanel from '../FilterPanel/FilterPanel';
 import TransactionItem, { type Transaction } from '../TransactionItem/TransactionItem';
 import styles from './TransactionList.module.css';
 import TransactionStats from '../transactionsStats/TransactionStats';
+import { useFilters } from '../../hooks/useTransactionsFilter';
 
 const creditDescriptions = [
 	'Stipendio Novembre',
@@ -53,60 +53,21 @@ function generateTransactions(count: number): Transaction[] {
 
 const allTransactions = generateTransactions(50);
 
-const defaultFilters: Filters = { type: 'all', searchText: '' };
-
-// ============================================================================
-
-type FilterAction =
-	| { type: 'SET_TYPE'; payload: Filters['type'] }
-	| { type: 'SET_SEARCH'; payload: string }
-	| { type: 'RESET' };
-
-const filterReducer = (state: Filters, action: FilterAction): Filters => {
-	switch (action.type) {
-		case 'SET_TYPE':
-			return { ...state, type: action.payload };
-
-		case 'SET_SEARCH':
-			return { ...state, searchText: action.payload };
-
-		case 'RESET':
-			return defaultFilters;
-
-		default:
-			return state;
-	}
-};
-
 // ============================================================================
 
 const TransactionList = () => {
-	const [filters, dispatch] = useReducer(filterReducer, defaultFilters);
-
-	const filteredTransactions = useMemo(() => {
-		return allTransactions.filter((tx) => {
-			const matchesType = filters.type === 'all' || tx.type === filters.type;
-			const matchesSearch = tx.description.toLowerCase().includes(filters.searchText.toLowerCase());
-
-			return matchesType && matchesSearch;
-		});
-	}, [filters]);
-
-	const total = useMemo(() => {
-		return filteredTransactions.reduce((sum, tx) => sum + (tx.type === 'credit' ? tx.amount : -tx.amount), 0);
-	}, [filteredTransactions]);
-
-	const handleTypeChange = useCallback((type: Filters['type']) => {
-		dispatch({ type: 'SET_TYPE', payload: type });
-	}, []);
-
-	const handleSearchChange = useCallback((text: string) => {
-		dispatch({ type: 'SET_SEARCH', payload: text });
-	}, []);
-
-	const handleResetFilters = useCallback(() => {
-		dispatch({ type: 'RESET' });
-	}, []);
+	const {
+		filteredTransactions,
+		filters,
+		handleAmountRangeChange,
+		handleDateRangeChange,
+		handleResetFilters,
+		handleSearchChange,
+		handleSortByChange,
+		handleSortOrderChange,
+		handleTypeChange,
+		total,
+	} = useFilters(allTransactions);
 
 	return (
 		<div className={styles.container}>
@@ -119,6 +80,10 @@ const TransactionList = () => {
 				filters={filters}
 				onTypeChange={handleTypeChange}
 				onSearchChange={handleSearchChange}
+				onDateRangeChange={handleDateRangeChange}
+				onAmountRangeChange={handleAmountRangeChange}
+				onSortByChange={handleSortByChange}
+				onSortOrderChange={handleSortOrderChange}
 				onReset={handleResetFilters}
 			/>
 
